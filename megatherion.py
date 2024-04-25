@@ -120,11 +120,14 @@ class DataFrame:
                                      for cname in self.columns))
         return "\n".join(lines)
 
-    def append_column(self, column: Column) -> None:
-        ...
+    def append_column(self,col_name: str, column: Column) -> None:
+        if col_name in self._columns:
+            raise ValueError("Duplicate collumn")
+        
+        self._columns[col_name] = column.copy()
 
     def append_row(self, row: Iterable) -> None:
-        ...
+        row = tuple(row)
 
     def filter(self, col_name:str, predicate: Callable[[Union[int, str]], bool]) -> 'DataFrame':
         ...
