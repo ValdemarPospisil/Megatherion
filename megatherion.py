@@ -70,7 +70,7 @@ class Column(MutableSequence):  # implement MutableSequence (some method are mix
 
     def permute(self, indices: List[int]):
         assert len(indices) == len(self)
-        ...
+        pass
 
     def copy(self) -> 'Column':
         # FIXME: value is casted to the same type (minor optimisation problem)
@@ -96,7 +96,7 @@ class DataFrame:
         self._columns = {name: column.copy() for name, column in columns.items()}
 
     def __getitem__(self, index: int) -> Tuple[Union[str,float]]:
-        ...
+        pass
 
     def __iter__(self) -> Iterator[Tuple[Union[str, float]]]:
         """
@@ -121,26 +121,51 @@ class DataFrame:
         return "\n".join(lines)
 
     def append_column(self,col_name: str, column: Column) -> None:
-        if col_name in self._columns:
+        if col_name == "":
+            col_name = str(len(self._columns.keys()))
+        elif col_name in self._columns:
             raise ValueError("Duplicate collumn")
         
         self._columns[col_name] = column.copy()
 
+    def mutuate(self,column: Column,col_name: str) -> 'DataFrame':
+        df_copy = self.copy()
+        if col_name in df_copy.columns:
+            self._columns[col_name]=column
+        else:
+            raise KeyError("Cant copy non-existent column")
+        return df_copy
+
+    def copy(self) -> 'DataFrame':
+        return DataFrame(self._columns)
+
     def append_row(self, row: Iterable) -> None:
+        """nutno ošetřit situaci kdy přidaný řádek má jiný počet hodnot než je počet sloupců tabulky
+         -možná řešení:
+            -> 1) vyhodím výjimku ValueError
+            -> 2) pokud je řádek kratší, doplníme hodnoty None nebo NA, pokud je řádek delší, usekeneme
+            hodnoty: -> uživatele upozorníme
+            -> 3) pokud je řádek kratší, hodnoty cyklicky doplňujemetak ,aby nikde nebyly chybějící záznamy
+                -> upozorníme uživatele
+           """
+        # zvolíme strategii 1)
+        # nejprve kontrola počtu záznamu
+        # iterace přes každý záznam iterable a přes všechny klíče dataframu
+        # por každý klíč zavoláme sloupci append a přidáme hodnotu řádků
         row = tuple(row)
 
     def filter(self, col_name:str, predicate: Callable[[Union[int, str]], bool]) -> 'DataFrame':
-        ...
+        pass
 
     def sort(self, col_name:str, ascending=True) -> 'DataFrame':
-        ...
+        pass
 
     def describe(self) -> str:
         """
         similar to pandas but only with min, max and avg statistics for floats and count"
         :return: string with decription
         """
-        ...
+        pass
 
     def inner_join(self, other: 'DataFrame', self_key_column: str,
                    other_key_column: str) -> 'DataFrame':
@@ -151,7 +176,7 @@ class DataFrame:
             Possible collision of column identifiers is resolved by prefixing `_other` to
             columns from `other` data table.
         """
-        ...
+        pass
 
     @staticmethod
     def read_csv(path: Union[str, Path]) -> 'DataFrame':
@@ -184,7 +209,8 @@ class JSONReader(Reader):
 
 class CSVReader(Reader):
     def read(self) -> 'DataFrame':
-        ...
+        pass
+    pass
 
 
 if __name__ == "__main__":
@@ -195,8 +221,13 @@ if __name__ == "__main__":
         ))
     print(df)
 
-    df = DataFrame.read_json("data.json")
-    print(df)
+    #df = DataFrame.read_json("data.json")
 
+c = Column(["Ota","Pavel"],dtype=Type.String)
+df.append_column("Autor",c)
+df.append_column("Jména",c)
+df.append_column("Jména",c)
+
+print(df)
 for line in df:
     print(line)
