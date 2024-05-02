@@ -1,0 +1,49 @@
+Vyjímky
+-------
+
+objekt nesoucí informaci o vyjímečné situaci (instance třídy odvození ze třídy odvozené z BaseException)
+
+vyjímečná situace:
+    - chybová situace (chybová = vyjímečná?)
+    - malá frekvence výskytu (co je malá?, nepoužitelná)
+    + je to situace, kterou nemůžete vyřešit v místě vzniku
+        řešení je možné v jiné vrstvě programu (typicky: IO chyba -> řešení v prezeční GUI vrstvě)
+        situace nebyla modelována (90/10 = 
+                                    situace jen v 10% případů, ale zaujímá 90% modelu nebo kodu)
+
+mechanismus šíření vyjímek:
+    dlouhý skok: skok z vnitřku vnořených funkcí (rámců funkcí) do nadřízených funkcí
+                uzavírání lokálních prostředí (zaniká prostředí, kde byla vyjímečná situace)
+                uvolňování vnějších prostředků (je nutné je uzavírat)
+
+
+vyjímka: objekt nesoucí informaci o vyjímečné situaci
+
+1. detekce vyjímečné situace
+    + vyj situace řešené běhovým prostředím (automatické vyjímky), dále viz
+
+2. vytvořit objekt vyjímky (volání konstruktoru)
+    třída vyjímky (třída odvozená z Exception, složité hierarchie nejsou dobré)
+    message: pouze pro ladění (nejsou určeny nezasvěceným, primárně jen pro zobrazení)
+    libovolné další atributy (číslo vyjímky, druh vyjímky, části kontextu), nevyžíváno
+    lokalizace vyjímky:
+        statická: číslo řádku
+        dynamické: rámce volaných funkcí
+
+3. vyhození vyjímky - raise 
+
+4. šíření vyjímky: statická část, dynamická část (z volané do volající funkce)
+
+5. zachycení:
+        throw blok:
+            vše se řeší až vznikne
+
+6. obsloužení:
+        ingnorovat: ať to řeší někdo nade mnou (nezachycené vyjímky)
+        vyhodíte jinou vyjímku:
+        zkusíte znova: musíte znovu provést komplexní kod vedoucí k vyjímce
+        zkusit alternativní řešení
+        soft ukončení aplikace
+
+
+    
