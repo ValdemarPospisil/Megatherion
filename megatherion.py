@@ -70,7 +70,14 @@ class Column(MutableSequence):  # implement MutableSequence (some method are mix
 
     def permute(self, indices: List[int]):
         assert len(indices) == len(self)
-        pass
+        # vytvořit nový sloupec
+        # projít přes všechny zadané indexy
+        # pro každý index vyberte odpovídající hodnotu sloupce self._data
+        # hodnotu přidejte do nově vytvořeného sloupce
+        new_column = Column([],self.dtype)
+        for i in indices:
+            new_column.append(self._data[i])
+        return new_column
 
     def copy(self) -> 'Column':
         # FIXME: value is casted to the same type (minor optimisation problem)
@@ -153,12 +160,85 @@ class DataFrame:
         # iterace přes každý záznam iterable a přes všechny klíče dataframu
         # por každý klíč zavoláme sloupci append a přidáme hodnotu řádků
         row = tuple(row)
+        if len(row) != len(self._columns):
+            raise WrongSizeException(f"Expected row of length {len(self._columns)}, but got length {len(row)}.")
+        
+        first_type = type(row[0])
+        for value in row:
+            if type(value) != first_type:
+                raise TypeError("Wrong data type")
+
+
+        
+        for column_name, value in zip(self._columns.keys(), row):
+            print(column_name,value)
+            self._columns[column_name].append(value)
+        self._size=+1    
+
+
 
     def filter(self, col_name:str, predicate: Callable[[Union[int, str]], bool]) -> 'DataFrame':
         pass
 
     def sort(self, col_name:str, ascending=True) -> 'DataFrame':
-        pass
+        # aplikujete řadící algoritmus na zvolený sloupec
+        # při řazení je nutné pamatovat si indexy řádů každé z hodnot
+        # výsledkem řazení je seznam indexů řádků, jak mají jít ve správném pořadí
+        # vytvoříte nový dataframe (kopii), na každý sloupec zavoláte permute(serazene_indexy)
+        # vratite novy dataframe
+        
+        indices = self.__merge_sort(self._columns[col_name])
+        df_new = self.copy()
+
+        for key in self._columns:
+            df_new.mutuate(df_new._columns[key].permute(indices),key)
+
+        return df_new
+    
+
+    @staticmethod
+    def __merge_sort(data: List[float]) -> List[int]:
+        if len(data) < 2:
+            return list(range(len(data)))
+
+        def merge(left, right, left_indices, right_indices):
+            sorted_list = []
+            sorted_indices = []
+            i = j = 0
+
+            while i < len(left) and j < len(right):
+                if left[i] <= right[j]:
+                    sorted_list.append(left[i])
+                    sorted_indices.append(left_indices[i])
+                    i += 1
+                else:
+                    sorted_list.append(right[j])
+                    sorted_indices.append(right_indices[j])
+                    j += 1
+
+            while i < len(left):
+                sorted_list.append(left[i])
+                sorted_indices.append(left_indices[i])
+                i += 1
+
+            while j < len(right):
+                sorted_list.append(right[j])
+                sorted_indices.append(right_indices[j])
+                j += 1
+
+            return sorted_list, sorted_indices
+
+        mid = len(data) // 2
+        left_part = data[:mid]
+        right_part = data[mid:]
+
+        left_sorted, left_indices_sorted = DataFrame.__merge_sort(left_part)
+        right_sorted, right_indices_sorted = DataFrame.__merge_sort(right_part)
+
+        merged_data, merged_indices = merge(left_sorted, right_sorted, left_indices_sorted, right_indices_sorted)
+        return merged_data, merged_indices
+
+   
 
     def describe(self) -> str:
         """
@@ -212,6 +292,16 @@ class CSVReader(Reader):
         pass
     pass
 
+class WrongSizeException(BaseException):
+    def __init__(self, message) -> None:
+        super().__init__(message)
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     df = DataFrame(dict(
@@ -219,15 +309,20 @@ if __name__ == "__main__":
         b=Column(["a", 2], Type.String),
         c=Column(range(2), Type.Float)
         ))
-    print(df)
+    #print(df)
 
     #df = DataFrame.read_json("data.json")
 
-c = Column(["Ota","Pavel"],dtype=Type.String)
-df.append_column("Autor",c)
-df.append_column("Jména",c)
-df.append_column("Jména",c)
+#c = Column(["Ota","Pavel"],dtype=Type.String)
+#df.append_column("Autor",c)
 
-print(df)
-for line in df:
-    print(line)
+#print(df)
+#for line in df:
+
+sloupec = Column([1,2,3,4,5,6,7],float)
+indexy=[3,2,1,4,5,2,3]
+
+sloupec2= sloupec.permute(indexy)
+
+for value in sloupec2._data:
+    print(value)
