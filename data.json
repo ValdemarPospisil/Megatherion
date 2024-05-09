@@ -1,5 +1,5 @@
 {
-  "numbers": [2, null, 2.3],
-  "texts": ["ahoj", "svete", null],
-  "mixed": [2, "a", null]
+  "numbers": [2, 5, 2.3],
+  "texts": ["ahoj", "svete", "velky"],
+  "mixed": [2, "a", 8]
 }

@@ -186,8 +186,13 @@ class DataFrame:
         # výsledkem řazení je seznam indexů řádků, jak mají jít ve správném pořadí
         # vytvoříte nový dataframe (kopii), na každý sloupec zavoláte permute(serazene_indexy)
         # vratite novy dataframe
+        if col_name not in self._columns:
+            raise KeyError(f"Column '{col_name}' does not exist in the DataFrame.")
         
-        indices = self.__merge_sort(self._columns[col_name])
+        column_data = list(self._columns[col_name])
+        indices = list(range(len(column_data)))
+
+        DataFrame.__merge_sort(column_data,indices,ascending)
         df_new = self.copy()
 
         for key in self._columns:
@@ -292,37 +297,11 @@ class CSVReader(Reader):
         pass
     pass
 
-class WrongSizeException(BaseException):
+class WrongSizeException(Exception):
     def __init__(self, message) -> None:
         super().__init__(message)
 
 
 
 
-
-
-
-
-if __name__ == "__main__":
-    df = DataFrame(dict(
-        a=Column([None, 3.1415], Type.Float),
-        b=Column(["a", 2], Type.String),
-        c=Column(range(2), Type.Float)
-        ))
-    #print(df)
-
-    #df = DataFrame.read_json("data.json")
-
-#c = Column(["Ota","Pavel"],dtype=Type.String)
-#df.append_column("Autor",c)
-
-#print(df)
-#for line in df:
-
-sloupec = Column([1,2,3,4,5,6,7],float)
-indexy=[3,2,1,4,5,2,3]
-
-sloupec2= sloupec.permute(indexy)
-
-for value in sloupec2._data:
-    print(value)
+# df = DataFrame.read_json("data.json")
