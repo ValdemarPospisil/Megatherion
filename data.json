@@ -1,5 +1,5 @@
 {
-  "numbers": [2, 5, 2.3],
-  "texts": ["ahoj", "svete", "velky"],
-  "mixed": [2, "a", 8]
+  "numbers": [2, 5, 2.3, 6, 8],
+  "texts": ["ahoj", "svete", "velky", "vesmir", "slunce"],
+  "mixed": [2, "a", 8, 9, "g"]
 }

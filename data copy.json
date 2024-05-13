@@ -1,0 +1,5 @@
+{
+  "numbers": [2, 9, 1.0, 6, 8],
+  "curses": ["APR2", "URDB", "ZKB", "OPS", "ZZD"],
+  "mixed": [8, "n", 2, 6, "w"]
+}

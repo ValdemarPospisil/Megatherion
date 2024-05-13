@@ -121,17 +121,21 @@ class DataFrame:
 
     def __repr__(self) -> str:
         lines = []
-        lines.append(" ".join(f"{name:12s}" for name in self.columns))
+
+        header_line = " ".join(f"{name:12s}" for name in self.columns)
+        lines.append(header_line)
+
         for i in range(len(self)):
-            lines.append(" ".join(self._columns[cname].get_formatted_item(i, width=12)
-                                     for cname in self.columns))
+            row_line = " ".join(str(self._columns[cname][i]).ljust(12) for cname in self.columns)
+            lines.append(row_line)
+
         return "\n".join(lines)
 
     def append_column(self,col_name: str, column: Column) -> None:
         if col_name == "":
             col_name = str(len(self._columns.keys()))
         elif col_name in self._columns:
-            raise ValueError("Duplicate collumn")
+            raise ValueError("Duplicate column")
         
         self._columns[col_name] = column.copy()
 
@@ -178,7 +182,17 @@ class DataFrame:
 
 
     def filter(self, col_name:str, predicate: Callable[[Union[int, str]], bool]) -> 'DataFrame':
-        pass
+
+        filtered_data = {name: [] for name in self.columns}
+        indices_to_keep = []
+        for i in range(len(self)):
+            if predicate(self._columns[col_name][i]):
+                indices_to_keep.append(i)
+
+        for name, col in self._columns.items():
+            filtered_data[name] = [col[i] for i in indices_to_keep]
+
+        return DataFrame(filtered_data)
 
     def sort(self, col_name:str, ascending=True) -> 'DataFrame':
         # aplikujete řadící algoritmus na zvolený sloupec
@@ -186,62 +200,39 @@ class DataFrame:
         # výsledkem řazení je seznam indexů řádků, jak mají jít ve správném pořadí
         # vytvoříte nový dataframe (kopii), na každý sloupec zavoláte permute(serazene_indexy)
         # vratite novy dataframe
-        if col_name not in self._columns:
-            raise KeyError(f"Column '{col_name}' does not exist in the DataFrame.")
+        data = [{name: col[i] for name, col in self._columns.items()} for i in range(len(self))]
+        sorted_data = self.__merge_sort(data, col_name, ascending)
         
-        column_data = list(self._columns[col_name])
-        indices = list(range(len(column_data)))
-
-        DataFrame.__merge_sort(column_data,indices,ascending)
-        df_new = self.copy()
-
-        for key in self._columns:
-            df_new.mutuate(df_new._columns[key].permute(indices),key)
-
-        return df_new
-    
+        sorted_columns = {name: [row[name] for row in sorted_data] for name in self.columns}
+        return DataFrame(sorted_columns)
 
     @staticmethod
-    def __merge_sort(data: List[float]) -> List[int]:
-        if len(data) < 2:
-            return list(range(len(data)))
+    def __merge_sort(arr, col_name, ascending=True):
+        if len(arr) <= 1:
+            return arr
 
-        def merge(left, right, left_indices, right_indices):
-            sorted_list = []
-            sorted_indices = []
-            i = j = 0
+        mid = len(arr) // 2
+        left = DataFrame.__merge_sort(arr[:mid], col_name, ascending)
+        right = DataFrame.__merge_sort(arr[mid:], col_name, ascending)
 
-            while i < len(left) and j < len(right):
-                if left[i] <= right[j]:
-                    sorted_list.append(left[i])
-                    sorted_indices.append(left_indices[i])
-                    i += 1
-                else:
-                    sorted_list.append(right[j])
-                    sorted_indices.append(right_indices[j])
-                    j += 1
+        return DataFrame.__merge(left, right, col_name, ascending)
 
-            while i < len(left):
-                sorted_list.append(left[i])
-                sorted_indices.append(left_indices[i])
-                i += 1
+    @staticmethod
+    def __merge(left, right, col_name, ascending):
+        result = []
+        left_idx, right_idx = 0, 0
 
-            while j < len(right):
-                sorted_list.append(right[j])
-                sorted_indices.append(right_indices[j])
-                j += 1
+        while left_idx < len(left) and right_idx < len(right):
+            if (left[left_idx][col_name] < right[right_idx][col_name]) if ascending else (left[left_idx][col_name] > right[right_idx][col_name]):
+                result.append(left[left_idx])
+                left_idx += 1
+            else:
+                result.append(right[right_idx])
+                right_idx += 1
 
-            return sorted_list, sorted_indices
-
-        mid = len(data) // 2
-        left_part = data[:mid]
-        right_part = data[mid:]
-
-        left_sorted, left_indices_sorted = DataFrame.__merge_sort(left_part)
-        right_sorted, right_indices_sorted = DataFrame.__merge_sort(right_part)
-
-        merged_data, merged_indices = merge(left_sorted, right_sorted, left_indices_sorted, right_indices_sorted)
-        return merged_data, merged_indices
+        result.extend(left[left_idx:])
+        result.extend(right[right_idx:])
+        return result
 
    
 
@@ -252,16 +243,46 @@ class DataFrame:
         """
         pass
 
-    def inner_join(self, other: 'DataFrame', self_key_column: str,
-                   other_key_column: str) -> 'DataFrame':
-        """
-            Inner join between self and other dataframe with join predicate
-            `self.key_column == other.key_column`.
+    def inner_join(self, other: 'DataFrame', self_key_column: str, other_key_column: str) -> 'DataFrame':
 
-            Possible collision of column identifiers is resolved by prefixing `_other` to
-            columns from `other` data table.
-        """
-        pass
+
+        joined_columns = {}
+
+        for col_name, col_data in self._columns.items():
+            # if col_name != self_key_column:
+                joined_columns[col_name] = col_data
+
+        for col_name, col_data in other._columns.items():
+            if col_name != other_key_column:
+                new_col_name = f"_other_{col_name}"
+                joined_columns[new_col_name] = col_data
+
+        joined_data = {col_name: [] for col_name in joined_columns}
+
+        #print(f"joined_columns:  {joined_columns}")
+        #print(f"joined_data:  {joined_data}")
+
+        for i in range(len(self)):
+            self_key_value = self._columns[self_key_column][i]
+            other_key_value = other._columns[other_key_column][i]
+
+            if self_key_value == other_key_value:
+                for col_name, col_data in self._columns.items():
+                 #   if col_name != self_key_column:
+                        joined_data[col_name].append(col_data[i])
+
+                for col_name, col_data in other._columns.items():
+                    if col_name != other_key_column:
+                        new_col_name = f"_other_{col_name}"
+                        joined_data[new_col_name].append(col_data[i])
+
+
+        #print(f"joined_data:  {joined_data}")
+
+        joined_df = DataFrame(joined_data)
+        
+        return joined_df
+    
 
     @staticmethod
     def read_csv(path: Union[str, Path]) -> 'DataFrame':
@@ -304,4 +325,3 @@ class WrongSizeException(Exception):
 
 
 
-# df = DataFrame.read_json("data.json")
