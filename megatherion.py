@@ -260,7 +260,6 @@ class DataFrame:
         joined_data = {col_name: [] for col_name in joined_columns}
 
         #print(f"joined_columns:  {joined_columns}")
-        #print(f"joined_data:  {joined_data}")
 
         for i in range(len(self)):
             self_key_value = self._columns[self_key_column][i]
