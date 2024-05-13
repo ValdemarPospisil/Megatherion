@@ -8,7 +8,6 @@ df2 = megatherion.DataFrame(data2)
 
 joined_df = df1.inner_join(df2, 'id', 'id')
 
-
 df3 = megatherion.DataFrame.read_json("data.json")
 df4 = megatherion.DataFrame.read_json("data copy.json")
 
