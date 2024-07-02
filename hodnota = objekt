@@ -1,0 +1,62 @@
+hodnota = objekt
+
+hodnota = data v paměti + interpretace (datový typ = jak velké, jaká je interpretace, jaké operace)
+
+objekt = instance třídy = model entity z reálného světa s nějakým chováním a representací
+
+v Pythonu: hodnota (procedurální) = objekt (OOP)
+
+hodnota:
+    shoda
+    vhodný
+    hodný
+    hody
+    hodina
+    god (rok)
+    hodit (házet)
+    hodit se 
+
+ghedh - shromáždit, nebo spojit
+
+bere, brát, nábor, nabírat = 
+
+    e - o
+    é - ó
+-------------------------------------------------------
+for i in iterable:
+
+
+iterovatelné -> __iter__ -> vrací iterátor
+
+    kolekce jsou iterovatelné -> __iter__ vrací iterátor přes položky
+    str (pole znaků) (a podobné objekty, bytes = pole bytů)
+
+    range -> lenivé iterátory (hodnoty nedrží v paměti a vrací je postupně), odlehčený objekt
+    range(1_000_000_000_000): jen pár bytů
+    list(range(1_000_000_000_000)) -> desítky TB
+
+    itertools -> složitější lenivé iterátory
+    nekonečné iterátory:
+        count(10,2) -> 10, 12, 14, ... nekonečno
+
+    zip(iter1, iter2) -> (iter1_item1, iter2_item2), (iter1_item2, iter2_item2), .....
+
+    enumerate(iter) -> (0, item0), (1, item1), ...
+
+    zpi(iter, count(0))
+
+    chain(iter1, iter2, ... iter n) -> 
+
+    for item in chain(list1, list2):
+        ...
+
+    list1.extends(list2)
+
+    dict1, dict2 -> sjednocení do jednoho dict.update(dict2)
+
+    lenivost se vyplatí (vše se provede až když je potřeba)
+                kdy ne?
+------------------------
+    repeat(item)
+
+    

@@ -241,7 +241,15 @@ class DataFrame:
         similar to pandas but only with min, max and avg statistics for floats and count"
         :return: string with decription
         """
-        pass
+        description = {}
+        for col_name, col_data in self._columns.items():
+            if col_data.dtype == Type.Float:
+                valid_data = [value for value in col_data if value is not None]
+                if valid_data:
+                    description[col_name]
+                    
+        return "\n".join(description)
+                    
 
     def inner_join(self, other: 'DataFrame', self_key_column: str, other_key_column: str) -> 'DataFrame':
 
@@ -249,8 +257,7 @@ class DataFrame:
         joined_columns = {}
 
         for col_name, col_data in self._columns.items():
-            # if col_name != self_key_column:
-                joined_columns[col_name] = col_data
+            joined_columns[col_name] = col_data
 
         for col_name, col_data in other._columns.items():
             if col_name != other_key_column:
