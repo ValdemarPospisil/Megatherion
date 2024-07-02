@@ -103,7 +103,7 @@ class DataFrame:
         self._columns = {name: column.copy() for name, column in columns.items()}
 
     def __getitem__(self, index: int) -> Tuple[Union[str,float]]:
-        pass
+        return tuple(column[index] for column in self._columns.values())
 
     def __iter__(self) -> Iterator[Tuple[Union[str, float]]]:
         """
@@ -281,6 +281,63 @@ class DataFrame:
         joined_df = DataFrame(joined_data)
         
         return joined_df
+    
+    def product(self, axis: int = 0) -> 'DataFrame':
+        def prod(iterable):
+            result = 1
+            for item in iterable:
+                result *= item
+            return result
+
+        if axis == 0:
+            # Součin přes sloupce
+            product_data = {name: [prod(col_data)] for name, col_data in self._columns.items()}
+        elif axis == 1:
+            # Součin přes řádky
+            row_products = [prod(self[i]) for i in range(len(self))]
+            product_data = {'product': row_products}
+        else:
+            raise ValueError("Axis must be 0 or 1")
+
+        return DataFrame({name: Column(data,int) for name, data in product_data.items()})
+    
+
+    def replace(self, to_replace, value) -> 'DataFrame':
+
+        if not isinstance(to_replace, list):
+            to_replace = [to_replace]
+
+        replaced_columns = {}
+
+        for col_name, column in self._columns.items():
+            replaced_data = [
+                value if item in to_replace else item 
+                for item in column
+            ]
+            replaced_columns[col_name] = Column(replaced_data, int)
+
+        return DataFrame(replaced_columns)
+    
+
+    def melt(self, id_vars: List[str], value_vars: List[str]) -> 'DataFrame':
+        """
+        Melt the DataFrame.
+        
+        :param id_vars: Columns to keep unchanged
+        :param value_vars: Columns to melt
+        :return: Melted DataFrame
+        """
+        melted_columns = {var: [] for var in id_vars + ['variable', 'value']}
+
+        for i in range(self._size):
+            id_values = {var: self._columns[var][i] for var in id_vars}
+            for value_var in value_vars:
+                for var in id_vars:
+                    melted_columns[var].append(id_values[var])
+                melted_columns['variable'].append(value_var)
+                melted_columns['value'].append(self._columns[value_var][i])
+
+        return DataFrame({col: Column(data) for col, data in melted_columns.items()})
     
 
     @staticmethod
